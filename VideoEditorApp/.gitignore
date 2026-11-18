@@ -9,3 +9,5 @@ obj/
 
 # OS-generated files
 .DS_Store
+
+Tools/FFmpeg/*.exe
