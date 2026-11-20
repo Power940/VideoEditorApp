@@ -8,12 +8,12 @@ using static Microsoft.Maui.ApplicationModel.Permissions;
 
 namespace VideoEditorApp
 {
-    internal class MediaFile
+    public class MediaFile
     {
-        private string FileName { get; set; }
-        private string FilePath { get; set; }
-        private string FileType { get; set; }
-        private string FileDuration { get; set; }
+        public string FileName { get; set; }
+        public string FilePath { get; set; }
+        public string FileType { get; set; }
+        public string FileDuration { get; set; }
 
         MediaFile(string fileName, string filePath, string fileType, string fileDuration)
         {
