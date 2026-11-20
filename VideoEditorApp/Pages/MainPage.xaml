@@ -4,21 +4,28 @@
              x:Class="VideoEditorApp.MainPage">
 
     <Grid RowDefinitions="2*, *" ColumnDefinitions="2*, 5*, 2*">
+        
         <Border Stroke="Black">
 
         </Border>
+        
         <Border Grid.Column="1"
                 Stroke="Black">
-
+            
+            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
+        
         </Border>
+        
         <Border Grid.Column="2"
                 Stroke="Black">
-
+        
         </Border>
+        
         <Border Grid.Row="1" Grid.ColumnSpan="3"
                 Stroke="Black">
 
         </Border>
+    
     </Grid>
 
 </ContentPage>
