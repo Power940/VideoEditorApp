@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="VideoEditorApp.MainPage">
 
     <Grid RowDefinitions="50, 2*, *" ColumnDefinitions="2*, 5*, 2*">
         
         <Border Grid.Row="1" Stroke="Black">
 
-            <CollectionView x:Name="MediaCollectionView" SelectionMode="Single">
+            <CollectionView x:Name="MediaCollectionView" SelectionMode="Single" SelectionChanged="MCV_SelectionChanged">
                 
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="4" VerticalItemSpacing="4" />
@@ -38,9 +39,17 @@
 
         <Border Grid.Row="1" Grid.Column="1"
                 Stroke="Black">
-            
-            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
-        
+
+            <Grid RowDefinitions="*, 50">
+                <toolkit:MediaElement x:Name="MediaPreview"/>
+                <FlexLayout Grid.Row="1" HorizontalOptions="Center" JustifyContent="SpaceEvenly" Wrap="NoWrap">
+                    <Button Text="Stop" WidthRequest="100" HeightRequest="50" Pressed="Stop_Pressed"/>
+                    <Button Text="Pause" WidthRequest="100" HeightRequest="50" Pressed="Pause_Pressed"/>
+                    <Button Text="Play" WidthRequest="100" HeightRequest="50" Pressed="Play_Pressed"/>
+                    <Button Text="2X" WidthRequest="100" HeightRequest="50" Pressed="FastForward_Pressed"/>
+                </FlexLayout>
+            </Grid>
+
         </Border>
 
         <Border Grid.Row="1" Grid.Column="2"
