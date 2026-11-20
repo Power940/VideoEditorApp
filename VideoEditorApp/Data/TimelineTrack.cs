@@ -19,7 +19,7 @@ namespace VideoEditorApp.Data
 
         public override string ToString()
         {
-            return $"Clips: {TimelineClips.Length}, isVideoTrack: {IsVideo}";
+            return $"Clips: {(TimelineClips ?? []).Length}, isVideoTrack: {IsVideo}";
         }
     }
 }
