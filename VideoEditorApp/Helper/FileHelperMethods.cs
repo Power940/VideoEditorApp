@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FFMpegCore;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -57,6 +58,28 @@ namespace VideoEditorApp
             catch (Exception) { }
 
             return null;
+        }
+
+        public static (int? width, int? height) GetResolution(string filePath)
+        {
+            VideoStream? videoStream = FFProbe.Analyse(filePath).PrimaryVideoStream;
+
+            if (videoStream != null)
+            {
+                return (videoStream.Width, videoStream.Height);
+            }
+
+            return (null, null);
+        }
+
+        public static TimeSpan GetDuration(string filePath)
+        {
+            return FFProbe.Analyse(filePath).Duration;
+        }
+
+        public static IMediaAnalysis GetRawVideoAudioData(string filePath)
+        {
+            return FFProbe.Analyse(filePath);
         }
     }
 }
