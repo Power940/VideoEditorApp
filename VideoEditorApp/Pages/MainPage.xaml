@@ -38,12 +38,14 @@
 
         <Border Grid.Row="1" Grid.Column="1"
                 Stroke="Black">
-
+            
+            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
+        
         </Border>
 
         <Border Grid.Row="1" Grid.Column="2"
                 Stroke="Black">
-
+        
         </Border>
         
         <Border Grid.Row="2" Grid.ColumnSpan="3"
