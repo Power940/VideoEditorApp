@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui.Views;
+﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Views;
 using FFMpegCore;
 using System.Collections.ObjectModel;
 using VideoEditorApp.Data;
@@ -16,7 +17,7 @@ namespace VideoEditorApp
         {
             InitializeComponent();
 
-            MediaCollectionView.ItemsSource = ImportedMedia;
+            ImportedMediaCollection_CV.ItemsSource = ImportedMedia;
 
             UpdateImportedMediaView();
         }
@@ -75,39 +76,61 @@ namespace VideoEditorApp
             UpdateImportedMediaView();
         }
 
-        private void MCV_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ImportedMediaCollection_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            MediaPreview.Source = Path.Combine(((ImportedMediaItemDisplay)MediaCollectionView.SelectedItem).FolderPath, "clip.mp4");
+            ImportedMediaItemDisplay item = (ImportedMediaItemDisplay)ImportedMediaCollection_CV.SelectedItem;
+            MediaPreview_ME.Source = Path.Combine(item.FolderPath, $"clip.mp4");
         }
 
-        private void Stop_Pressed(object sender, EventArgs e)
+        private void ToStart_BTN_Pressed(object? sender, EventArgs e)
         {
-            MediaPreview.Stop();
+            MediaPreview_ME.Stop();
+            PlayPause_BTN.Text = "Pause";
         }
 
-        private void Pause_Pressed(object sender, EventArgs e)
+        private async void Back10_BTN_Pressed(object? sender, EventArgs e)
         {
-            MediaPreview.Pause();
+            await MediaPreview_ME.SeekTo(MediaPreview_ME.Position - TimeSpan.FromSeconds(10));
         }
 
-        private void Play_Pressed(object sender, EventArgs e)
+        private void PlayPause_BTN_Pressed(object? sender, EventArgs e)
         {
-            if (MediaCollectionView.SelectedItem != null &&
-                MediaPreview.CurrentState != CommunityToolkit.Maui.Core.MediaElementState.Playing)
+            if (PlayPause_BTN.Text == "Play")
             {
-                MediaPreview.Play();
+                MediaPreview_ME.Play();
+                PlayPause_BTN.Text = "Pause";
             }
-            MediaPreview.Speed = 1;
+            else
+            {
+                MediaPreview_ME.Pause();
+                PlayPause_BTN.Text = "Play";
+            }
         }
 
-        private void FastForward_Pressed(object sender, EventArgs e)
+        private async void Forward10_BTN_Pressed(object? sender, EventArgs e)
         {
-            if (MediaCollectionView.SelectedItem != null &&
-                MediaPreview.CurrentState != CommunityToolkit.Maui.Core.MediaElementState.Playing)
+            await MediaPreview_ME.SeekTo(MediaPreview_ME.Position + TimeSpan.FromSeconds(10));
+        }
+
+        private async void ToEnd_BTN_Pressed(object? sender, EventArgs e)
+        {
+            MediaPreview_ME.Pause();
+            await MediaPreview_ME.SeekTo(MediaPreview_ME.Duration);
+            PlayPause_BTN.Text = "Pause";
+        }
+
+        private void SpeedChange_BTN_Pressed(object? sender, EventArgs e)
+        {
+            if (SpeedChange_BTN.Text == "2x")
             {
-                MediaPreview.Play();
+                MediaPreview_ME.Speed = 2;
+                SpeedChange_BTN.Text = "1x";
             }
-            MediaPreview.Speed = 2;
+            else if (SpeedChange_BTN.Text == "1x")
+            {
+                MediaPreview_ME.Speed = 1;
+                SpeedChange_BTN.Text = "2x";
+            }
         }
     }
 }
