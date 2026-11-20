@@ -49,7 +49,7 @@ namespace VideoEditorApp
             }
         }
 
-        private async void Import_BTN_Clicked(object sender, EventArgs e)
+        private async void Import_BTN_Clicked(object? sender, EventArgs e)
         {
             FileResult? file = await FileHelperMethods.PickSingleFileAsync();
             if (file == null) { return; }
@@ -71,6 +71,11 @@ namespace VideoEditorApp
             File.Copy(file.FullPath, Path.Combine(folderPath, $"clip{Path.GetExtension(file.FileName)}"));
 
             UpdateImportedMediaView();
+        }
+
+        private void MediaCollectionView_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            //MyMediaElement.Source = Path.Combine(((ImportedMediaItemDisplay)MediaCollectionView.SelectedItem).FolderPath, "clip.mp4");
         }
     }
 }
