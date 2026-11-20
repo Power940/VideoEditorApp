@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="VideoEditorApp.MainPage">
 
     <Grid RowDefinitions="50, 2*, *" ColumnDefinitions="2*, 5*, 2*">
         
         <Border Grid.Row="1" Stroke="Black">
 
-            <CollectionView x:Name="MediaCollectionView" SelectionMode="Single">
+            <CollectionView x:Name="ImportedMediaCollection_CV" SelectionMode="Single" SelectionChanged="ImportedMediaCollection_CV_SelectionChanged">
                 
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="4" VerticalItemSpacing="4" />
@@ -31,6 +32,7 @@
                         
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
+                
             </CollectionView>
 
 
@@ -38,9 +40,19 @@
 
         <Border Grid.Row="1" Grid.Column="1"
                 Stroke="Black">
-            
-            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
-        
+
+            <Grid RowDefinitions="*, 50">
+                <toolkit:MediaElement x:Name="MediaPreview_ME"/>
+                <FlexLayout Grid.Row="1" HorizontalOptions="Center" JustifyContent="SpaceEvenly" Wrap="NoWrap">
+                    <Button x:Name="ToStart_BTN" Text="|&lt;&lt;" WidthRequest="100" HeightRequest="50" Pressed="ToStart_BTN_Pressed"/>
+                    <Button x:Name="Back10_BTN" Text="&lt; 10s" WidthRequest="100" HeightRequest="50" Pressed="Back10_BTN_Pressed"/>
+                    <Button x:Name="PlayPause_BTN" Text="Play" WidthRequest="100" HeightRequest="50" Pressed="PlayPause_BTN_Pressed"/>
+                    <Button x:Name="Forward10_BTN" Text="10s >" WidthRequest="100" HeightRequest="50" Pressed="Forward10_BTN_Pressed"/>
+                    <Button x:Name="ToEnd_BTN" Text=">>|" WidthRequest="100" HeightRequest="50" Pressed="ToEnd_BTN_Pressed"/>
+                    <Button x:Name="SpeedChange_BTN" Text="2x" WidthRequest="100" HeightRequest="50" Pressed="SpeedChange_BTN_Pressed"/>
+                </FlexLayout>
+            </Grid>
+
         </Border>
 
         <Border Grid.Row="1" Grid.Column="2"
@@ -50,7 +62,9 @@
         
         <Border Grid.Row="2" Grid.ColumnSpan="3"
                 Stroke="Black">
-
+            <AbsoluteLayout x:Name="Timeline_AL">
+                
+            </AbsoluteLayout>
         </Border>
         
         <Button HorizontalOptions="Start" VerticalOptions="Start" WidthRequest="50" HeightRequest="50" Clicked="Import_BTN_Clicked"/>
