@@ -13,17 +13,19 @@ namespace VideoEditorApp
         private string FileName { get; set; }
         private string FilePath { get; set; }
         private string FileType { get; set; }
+        private string FileDuration { get; set; }
 
-        MediaFile(string fileName, string filePath, string fileType)
+        MediaFile(string fileName, string filePath, string fileType, string fileDuration)
         {
             FileName = fileName;
             FilePath = filePath;
             FileType = fileType;
+            FileDuration = fileDuration;
         }
 
         public override string ToString()
         {
-            return $"File Name: {FileName}, File Path: {FilePath}, File Type: {FileType}";
+            return $"File Name: {FileName}, File Path: {FilePath}, File Type: {FileType}, File Duration: {FileDuration}";
         }
 
     }
