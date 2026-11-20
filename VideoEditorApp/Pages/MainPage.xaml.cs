@@ -1,4 +1,5 @@
-﻿using FFMpegCore;
+﻿using CommunityToolkit.Maui.Views;
+using FFMpegCore;
 using System.Collections.ObjectModel;
 using VideoEditorApp.Data;
 using Windows.UI.Popups;
@@ -8,6 +9,7 @@ namespace VideoEditorApp
 {
     public partial class MainPage : ContentPage
     {
+
         public ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = new();
 
         public MainPage()
@@ -73,9 +75,39 @@ namespace VideoEditorApp
             UpdateImportedMediaView();
         }
 
-        private void MediaCollectionView_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        private void MCV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //MyMediaElement.Source = Path.Combine(((ImportedMediaItemDisplay)MediaCollectionView.SelectedItem).FolderPath, "clip.mp4");
+            MediaPreview.Source = Path.Combine(((ImportedMediaItemDisplay)MediaCollectionView.SelectedItem).FolderPath, "clip.mp4");
+        }
+
+        private void Stop_Pressed(object sender, EventArgs e)
+        {
+            MediaPreview.Stop();
+        }
+
+        private void Pause_Pressed(object sender, EventArgs e)
+        {
+            MediaPreview.Pause();
+        }
+
+        private void Play_Pressed(object sender, EventArgs e)
+        {
+            if (MediaCollectionView.SelectedItem != null &&
+                MediaPreview.CurrentState != CommunityToolkit.Maui.Core.MediaElementState.Playing)
+            {
+                MediaPreview.Play();
+            }
+            MediaPreview.Speed = 1;
+        }
+
+        private void FastForward_Pressed(object sender, EventArgs e)
+        {
+            if (MediaCollectionView.SelectedItem != null &&
+                MediaPreview.CurrentState != CommunityToolkit.Maui.Core.MediaElementState.Playing)
+            {
+                MediaPreview.Play();
+            }
+            MediaPreview.Speed = 2;
         }
     }
 }

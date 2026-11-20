@@ -40,7 +40,15 @@
         <Border Grid.Row="1" Grid.Column="1"
                 Stroke="Black">
 
-            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <Grid RowDefinitions="*, 50">
+                <toolkit:MediaElement x:Name="MediaPreview"/>
+                <FlexLayout Grid.Row="1" HorizontalOptions="Center" JustifyContent="SpaceEvenly" Wrap="NoWrap">
+                    <Button Text="Stop" WidthRequest="100" HeightRequest="50" Pressed="Stop_Pressed"/>
+                    <Button Text="Pause" WidthRequest="100" HeightRequest="50" Pressed="Pause_Pressed"/>
+                    <Button Text="Play" WidthRequest="100" HeightRequest="50" Pressed="Play_Pressed"/>
+                    <Button Text="2X" WidthRequest="100" HeightRequest="50" Pressed="FastForward_Pressed"/>
+                </FlexLayout>
+            </Grid>
 
         </Border>
 
@@ -51,7 +59,9 @@
         
         <Border Grid.Row="2" Grid.ColumnSpan="3"
                 Stroke="Black">
-
+            <AbsoluteLayout x:Name="Timeline">
+                
+            </AbsoluteLayout>
         </Border>
         
         <Button HorizontalOptions="Start" VerticalOptions="Start" WidthRequest="50" HeightRequest="50" Clicked="Import_BTN_Clicked"/>
