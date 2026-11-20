@@ -3,24 +3,60 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="VideoEditorApp.MainPage">
 
-    <Grid RowDefinitions="2*, *" ColumnDefinitions="2*, 5*, 2*">
-        <Border Stroke="Black">
+    <Grid RowDefinitions="50, 2*, *" ColumnDefinitions="2*, 5*, 2*">
+        
+        <Border Grid.Row="1" Stroke="Black">
+
+            <CollectionView x:Name="MediaCollectionView" SelectionMode="Single">
+                
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="4" VerticalItemSpacing="4" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        
+                        <Grid HeightRequest="80" WidthRequest="120">
+                            
+                            <Image Source="{Binding Thumbnail}" Aspect="AspectFill" />
+
+                            <BoxView Color="#66000000" />
+
+                            <VerticalStackLayout Padding="4" VerticalOptions="End">
+                                <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}" TextColor="White" />
+                                <Label Text="{Binding FileDisplayText}" LineBreakMode="TailTruncation" FontSize="12" TextColor="White" />
+                            </VerticalStackLayout>
+                            
+                        </Grid>
+                        
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
 
         </Border>
-        <Border Grid.Column="1"
+
+        <Border Grid.Row="1" Grid.Column="1"
                 Stroke="Black">
-
+            
+            <FlexLayout x:Name="PreviewPanel" HorizontalOptions="Center" VerticalOptions="Center"/>
+        
         </Border>
-        <Border Grid.Column="2"
+
+        <Border Grid.Row="1" Grid.Column="2"
                 Stroke="Black">
-
+        
         </Border>
-        <Border Grid.Row="1" Grid.ColumnSpan="3"
+        
+        <Border Grid.Row="2" Grid.ColumnSpan="3"
                 Stroke="Black">
             <AbsoluteLayout x:Name="Timeline">
                 
             </AbsoluteLayout>
         </Border>
+        
+        <Button HorizontalOptions="Start" VerticalOptions="Start" WidthRequest="50" HeightRequest="50" Clicked="Import_BTN_Clicked"/>
+        
     </Grid>
 
 </ContentPage>
