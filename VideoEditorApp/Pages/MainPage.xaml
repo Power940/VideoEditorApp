@@ -42,7 +42,7 @@
                 Stroke="Black">
 
             <Grid RowDefinitions="*, 50">
-                <toolkit:MediaElement x:Name="MediaPreview_ME"/>
+                <toolkit:MediaElement x:Name="MediaPreview_ME" StateChanged="MediaPreview_ME_StateChanged"/>
                 <FlexLayout Grid.Row="1" HorizontalOptions="Center" JustifyContent="SpaceEvenly" Wrap="NoWrap">
                     <Button x:Name="ToStart_BTN" Text="|&lt;&lt;" WidthRequest="100" HeightRequest="50" Pressed="ToStart_BTN_Pressed"/>
                     <Button x:Name="Back10_BTN" Text="&lt; 10s" WidthRequest="100" HeightRequest="50" Pressed="Back10_BTN_Pressed"/>
@@ -66,8 +66,11 @@
                 
             </AbsoluteLayout>
         </Border>
-        
-        <Button HorizontalOptions="Start" VerticalOptions="Start" WidthRequest="50" HeightRequest="50" Clicked="Import_BTN_Clicked"/>
+
+        <HorizontalStackLayout HorizontalOptions="Start">
+            <Button ImageSource="import_one.png" Clicked="Import_BTN_Clicked"/>
+            <Button ImageSource="import_multi.png" Clicked="ImportMulti_BTN_Clicked"/>
+        </HorizontalStackLayout>
         
     </Grid>
 

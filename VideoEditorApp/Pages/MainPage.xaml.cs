@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui.Views;
 using FFMpegCore;
 using System.Collections.ObjectModel;
+using System.IO.Compression;
 using VideoEditorApp.Data;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
@@ -22,6 +23,30 @@ namespace VideoEditorApp
             UpdateImportedMediaView();
         }
 
+        public void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
+        {
+            if (FileHelperMethods.videoExtensions.Contains(Path.GetExtension(fullClipFilePath)))
+            {
+                ImportedMedia.Add(new()
+                {
+                    Thumbnail = "video_placeholder.jpg",
+                    Duration = FileHelperMethods.GetDuration(fullClipFilePath),
+                    FileDisplayText = new DirectoryInfo(folderPath).Name,
+                    FolderPath = folderPath
+                });
+            }
+            else if (FileHelperMethods.audioExtensions.Contains(Path.GetExtension(fullClipFilePath)))
+            {
+                ImportedMedia.Add(new()
+                {
+                    Thumbnail = "audio_placeholder.jpg",
+                    Duration = FileHelperMethods.GetDuration(fullClipFilePath),
+                    FileDisplayText = new DirectoryInfo(folderPath).Name,
+                    FolderPath = folderPath
+                });
+            }
+        }
+
         public void UpdateImportedMediaView()
         {
             foreach (string fileFolderPath in Directory.EnumerateDirectories(FileHelperMethods.GetProxyDirectory()))
@@ -29,26 +54,7 @@ namespace VideoEditorApp
                 string? clipFile = Directory.EnumerateFiles(fileFolderPath, "clip.*").FirstOrDefault();
                 if (String.IsNullOrWhiteSpace(clipFile)) { continue; }
 
-                if (FileHelperMethods.videoExtensions.Contains(Path.GetExtension(clipFile)))
-                {
-                    ImportedMedia.Add(new()
-                    {
-                        Thumbnail = "video_placeholder.jpg",
-                        Duration = FileHelperMethods.GetDuration(clipFile),
-                        FileDisplayText = new DirectoryInfo(fileFolderPath).Name,
-                        FolderPath = fileFolderPath
-                    });
-                }
-                else if (FileHelperMethods.audioExtensions.Contains(Path.GetExtension(clipFile)))
-                {
-                    ImportedMedia.Add(new()
-                    {
-                        Thumbnail = "audio_placeholder.jpg",
-                        Duration = FileHelperMethods.GetDuration(clipFile),
-                        FileDisplayText = new DirectoryInfo(fileFolderPath).Name,
-                        FolderPath = fileFolderPath
-                    });
-                }
+                AddImportedMediaItemToView(clipFile, fileFolderPath);
             }
         }
 
@@ -73,24 +79,55 @@ namespace VideoEditorApp
 
             File.Copy(file.FullPath, Path.Combine(folderPath, $"clip{Path.GetExtension(file.FileName)}"));
 
-            UpdateImportedMediaView();
+            AddImportedMediaItemToView(Path.Combine(folderPath, $"clip{Path.GetExtension(file.FileName)}"), folderPath);
+        }
+
+        private async void ImportMulti_BTN_Clicked(object? sender, EventArgs e)
+        {
+            List<FileResult>? files = await FileHelperMethods.PickMultipleFilesAsync();
+            if (files == null || files.Count == 0) { return; }
+
+            foreach(FileResult file in files)
+            {
+                string folderPath = Path.Combine(FileHelperMethods.GetProxyDirectory(), Path.GetFileNameWithoutExtension(file.FileName));
+
+                if (Directory.Exists(folderPath))
+                {
+                    folderPath += "(1)";
+                    int i = 2;
+                    while (Directory.Exists(folderPath))
+                    {
+                        folderPath = $"{folderPath[..^2]}{i++})";
+                    }
+                }
+
+                Directory.CreateDirectory(folderPath);
+
+                File.Copy(file.FullPath, Path.Combine(folderPath, $"clip{Path.GetExtension(file.FileName)}"));
+
+                AddImportedMediaItemToView(Path.Combine(folderPath, $"clip{Path.GetExtension(file.FileName)}"), folderPath);
+            }
         }
 
         private void ImportedMediaCollection_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             ImportedMediaItemDisplay item = (ImportedMediaItemDisplay)ImportedMediaCollection_CV.SelectedItem;
-            MediaPreview_ME.Source = Path.Combine(item.FolderPath, $"clip.mp4");
+            try
+            {
+                MediaPreview_ME.Source = Path.Combine(item.FolderPath, $"clip.mp4");
+            }
+            catch (Exception) { return; }
         }
 
         private void ToStart_BTN_Pressed(object? sender, EventArgs e)
         {
             MediaPreview_ME.Stop();
-            PlayPause_BTN.Text = "Pause";
         }
 
         private async void Back10_BTN_Pressed(object? sender, EventArgs e)
         {
-            await MediaPreview_ME.SeekTo(MediaPreview_ME.Position - TimeSpan.FromSeconds(10));
+            TimeSpan newPos = MediaPreview_ME.Position.Subtract(TimeSpan.FromSeconds(10));
+            await MediaPreview_ME.SeekTo((newPos < TimeSpan.Zero) ? TimeSpan.Zero : newPos);
         }
 
         private void PlayPause_BTN_Pressed(object? sender, EventArgs e)
@@ -98,25 +135,23 @@ namespace VideoEditorApp
             if (PlayPause_BTN.Text == "Play")
             {
                 MediaPreview_ME.Play();
-                PlayPause_BTN.Text = "Pause";
             }
             else
             {
                 MediaPreview_ME.Pause();
-                PlayPause_BTN.Text = "Play";
             }
         }
 
         private async void Forward10_BTN_Pressed(object? sender, EventArgs e)
         {
-            await MediaPreview_ME.SeekTo(MediaPreview_ME.Position + TimeSpan.FromSeconds(10));
+            TimeSpan newPos = MediaPreview_ME.Position.Add(TimeSpan.FromSeconds(10));
+            await MediaPreview_ME.SeekTo((newPos > MediaPreview_ME.Duration) ? MediaPreview_ME.Duration : newPos);
         }
 
         private async void ToEnd_BTN_Pressed(object? sender, EventArgs e)
         {
             MediaPreview_ME.Pause();
             await MediaPreview_ME.SeekTo(MediaPreview_ME.Duration);
-            PlayPause_BTN.Text = "Pause";
         }
 
         private void SpeedChange_BTN_Pressed(object? sender, EventArgs e)
@@ -131,6 +166,21 @@ namespace VideoEditorApp
                 MediaPreview_ME.Speed = 1;
                 SpeedChange_BTN.Text = "2x";
             }
+        }
+
+        private void MediaPreview_ME_StateChanged(object? sender, EventArgs e)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                PlayPause_BTN.Text = MediaPreview_ME.CurrentState switch
+                {
+                    MediaElementState.Playing => "Pause",
+                    MediaElementState.Paused or
+                    MediaElementState.Stopped or
+                    MediaElementState.Failed => "Play",
+                    _ => PlayPause_BTN.Text
+                };
+            });
         }
     }
 }
