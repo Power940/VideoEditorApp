@@ -13,20 +13,24 @@ namespace VideoEditorApp
         public static readonly string[] audioExtensions = {
             ".mp3", ".wav", ".flac", ".m4a", ".wma"
         };
-
         public static readonly string[] stringExtensions = [.. videoExtensions, .. audioExtensions];
 
-        private static readonly PickOptions options = new()
+        private static readonly PickOptions singleOptions = new()
         {
-            PickerTitle = "Please select a file",
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>> {{ DevicePlatform.WinUI, stringExtensions}})
+            PickerTitle = "Please select an audio or video file",
+            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>> { { DevicePlatform.WinUI, stringExtensions } })
+        };
+        private static readonly PickOptions multiOptions = new()
+        {
+            PickerTitle = "Please select any number of audio or video files",
+            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>> { { DevicePlatform.WinUI, stringExtensions } })
         };
 
         public static async Task<FileResult?> PickSingleFileAsync()
         {
             try
             {
-                FileResult? result = await FilePicker.Default.PickAsync(options);
+                FileResult? result = await FilePicker.Default.PickAsync(singleOptions);
 
                 if (result == null || !File.Exists(result.FullPath)) { return null; }
 
@@ -38,14 +42,14 @@ namespace VideoEditorApp
             return null;
         }
 
-        public static async Task<IEnumerable<FileResult>?> PickMultipleFilesAsync()
+        public static async Task<List<FileResult>?> PickMultipleFilesAsync()
         {
             try
             {
-                IEnumerable<FileResult>? results = await FilePicker.Default.PickMultipleAsync(options);
-                if (results == null) { return null; }
+                IEnumerable<FileResult>? results = await FilePicker.Default.PickMultipleAsync(multiOptions);
+                if (results == null || !results.Any()) { return null; }
 
-                IEnumerable<FileResult> safeReturn = [];
+                List<FileResult> safeReturn = [];
 
                 foreach (FileResult? file in results)
                 {
@@ -54,7 +58,7 @@ namespace VideoEditorApp
                     string extension = Path.GetExtension(file.FileName);
                     if (extension != String.Empty && stringExtensions.Contains(extension))
                     {
-                        _ = safeReturn.Append(file);
+                        safeReturn.Add(file);
                     }
                 }
 
