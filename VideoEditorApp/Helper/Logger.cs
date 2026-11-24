@@ -1,53 +1,55 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace VideoEditorApp.Helper
 {
     static class Logger
     {
-        private static readonly ConcurrentQueue<string> logs = [];
-        private static readonly Thread logWriteThread = new(LoggingLoop);
-        private static readonly string logFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        private static readonly StreamWriter logWriter;
+        private static readonly BlockingCollection<string> logs = [];
+        private static readonly Thread logWriteThread;
+        private static readonly string logDirPath = Path.Combine(FileSystem.Current.AppDataDirectory, "Logs");
+        private static readonly string logFilePath;
 
 
         static Logger()
         {
-            logWriteThread.IsBackground = true;
-            logWriter = File.CreateText(Path.Combine(logFilePath, "Logs", DateTime.Now.ToString()));
+            Directory.CreateDirectory(logDirPath);
+            logFilePath = Path.Combine(logDirPath, DateTime.Now.ToString("MM-dd_HH-mm-ss") + ".txt");
+
+            logWriteThread = new Thread(LoggingLoop)
+            {
+                IsBackground = true,
+                Name = "FileLoggerThread"
+            };
+            logWriteThread.Start();
         }
 
-        static private void LoggingLoop()
+        private static void LoggingLoop()
         {
-            while (true)
+            try
             {
-                if (logs.IsEmpty)
+                using StreamWriter writer = new(logFilePath, append: true) { AutoFlush = true };
+                foreach (string message in logs.GetConsumingEnumerable())
                 {
-                    Thread.Sleep(50);
-                    continue;
-                }
-
-                while (!logs.IsEmpty)
-                {
-                    if (logs.TryDequeue(out string? result) && !String.IsNullOrWhiteSpace(result))
+                    if (!string.IsNullOrWhiteSpace(message))
                     {
-                        logWriter.WriteLine(result);
+                        writer.WriteLine(message);
                     }
                 }
-
-                Thread.Sleep(50);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Logger failed: {ex.Message}");
             }
         }
-    class Logger
-    {
-        ConcurrentQueue<string> logs = [];
 
-        public void Log(string message)
+        public static void Log(string message)
         {
-            string currentTime = DateTime.Now.ToString();
-            logs.Enqueue($"({currentTime}) Message: {message}");
+            string currentTime = DateTime.Now.ToString("HH:mm:ss.fff");
+            logs.Add($"({currentTime}) Message: {message}");
         }
     }
 }

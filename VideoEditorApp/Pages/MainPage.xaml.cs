@@ -4,6 +4,7 @@ using FFMpegCore;
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using VideoEditorApp.Data;
+using VideoEditorApp.Helper;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 
@@ -25,6 +26,7 @@ namespace VideoEditorApp
 
         public void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
         {
+            Logger.Log($"AddImportedMediaItemToView | fullClipFilePath:{fullClipFilePath} | folderPath:{folderPath}");
             if (FileHelperMethods.videoExtensions.Contains(Path.GetExtension(fullClipFilePath)))
             {
                 ImportedMedia.Add(new()
