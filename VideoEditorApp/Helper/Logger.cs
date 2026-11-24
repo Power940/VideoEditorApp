@@ -5,8 +5,40 @@ using System.Text;
 
 namespace VideoEditorApp.Helper
 {
-    class Logger
+    static class Logger
     {
-        ConcurrentQueue<string> logs = [];
+        private static readonly ConcurrentQueue<string> logs = [];
+        private static readonly Thread logWriteThread = new(LoggingLoop);
+        private static readonly string logFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        private static readonly StreamWriter logWriter;
+
+
+        static Logger()
+        {
+            logWriteThread.IsBackground = true;
+            logWriter = File.CreateText(Path.Combine(logFilePath, "Logs", DateTime.Now.ToString()));
+        }
+
+        static private void LoggingLoop()
+        {
+            while (true)
+            {
+                if (logs.IsEmpty)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+
+                while (!logs.IsEmpty)
+                {
+                    if (logs.TryDequeue(out string? result) && !String.IsNullOrWhiteSpace(result))
+                    {
+                        logWriter.WriteLine(result);
+                    }
+                }
+
+                Thread.Sleep(50);
+            }
+        }
     }
 }
