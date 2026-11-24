@@ -16,7 +16,7 @@ namespace VideoEditorApp
         private int TrimStart { get; set; }
         private int TrimDuration { get; set; }
 
-        TimelineClip(MediaFile mediaSource, string startPosition, string endPosition)
+        public TimelineClip(MediaFile mediaSource, string startPosition, string endPosition)
         {
             MediaSource = mediaSource;
             StartPosition = startPosition;
