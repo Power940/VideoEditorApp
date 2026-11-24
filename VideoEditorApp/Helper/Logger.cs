@@ -40,5 +40,14 @@ namespace VideoEditorApp.Helper
                 Thread.Sleep(50);
             }
         }
+    class Logger
+    {
+        ConcurrentQueue<string> logs = [];
+
+        public void Log(string message)
+        {
+            string currentTime = DateTime.Now.ToString();
+            logs.Enqueue($"({currentTime}) Message: {message}");
+        }
     }
 }
