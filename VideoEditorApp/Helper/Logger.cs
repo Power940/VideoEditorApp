@@ -49,7 +49,7 @@ namespace VideoEditorApp.Helper
         public static void Log(string message)
         {
             string currentTime = DateTime.Now.ToString("HH:mm:ss.fff");
-            logs.Add($"({currentTime}) Message: {message}");
+            logs.Add($"[{currentTime}] | {message}");
         }
     }
 }

@@ -13,7 +13,10 @@ namespace VideoEditorApp
     public partial class MainPage : ContentPage
     {
 
-        public ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = new();
+        private ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = [];
+        private bool deleteImportsMode = false;
+        private bool ignoreSelectionChangedImportedMedia = false;
+
 
         public MainPage()
         {
@@ -24,7 +27,7 @@ namespace VideoEditorApp
             UpdateImportedMediaView();
         }
 
-        public void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
+        private void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
         {
             Logger.Log($"AddImportedMediaItemToView | fullClipFilePath:{fullClipFilePath} | folderPath:{folderPath}");
             if (FileHelperMethods.videoExtensions.Contains(Path.GetExtension(fullClipFilePath)))
@@ -49,7 +52,7 @@ namespace VideoEditorApp
             }
         }
 
-        public void UpdateImportedMediaView()
+        private void UpdateImportedMediaView()
         {
             foreach (string fileFolderPath in Directory.EnumerateDirectories(FileHelperMethods.GetProxyDirectory()))
             {
@@ -113,6 +116,7 @@ namespace VideoEditorApp
 
         private void ImportedMediaCollection_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
+            if (ignoreSelectionChangedImportedMedia) { return; }
             ImportedMediaItemDisplay item = (ImportedMediaItemDisplay)ImportedMediaCollection_CV.SelectedItem;
             try
             {
@@ -183,6 +187,40 @@ namespace VideoEditorApp
                     _ => PlayPause_BTN.Text
                 };
             });
+        }
+
+        private void DeleteMode_BTN_Clicked(object? sender, EventArgs e)
+        {
+            deleteImportsMode = !deleteImportsMode;
+
+            if (deleteImportsMode)
+            {
+                ignoreSelectionChangedImportedMedia = true;
+                ImportedMediaCollection_CV.SelectedItem = null;
+                ImportedMediaCollection_CV.SelectedItems = null;
+                ImportedMediaCollection_CV.SelectionMode = SelectionMode.Multiple;
+            }
+            else
+            {
+                List<ImportedMediaItemDisplay> tempList = [..ImportedMediaCollection_CV.SelectedItems.Cast<ImportedMediaItemDisplay>()];
+                foreach (ImportedMediaItemDisplay item in tempList)
+                {
+                    try
+                    {
+                        Directory.Delete(item.FolderPath, true);
+                        ImportedMedia.Remove(item);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Imported media deletion failed: {ex.Message}");
+                    }
+                }
+
+                ImportedMediaCollection_CV.SelectedItem = null;
+                ImportedMediaCollection_CV.SelectedItems = null;
+                ignoreSelectionChangedImportedMedia = false;
+                ImportedMediaCollection_CV.SelectionMode = SelectionMode.Single;
+            }
         }
     }
 }
