@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 using FFMpegCore;
+using Gma.System.MouseKeyHook;
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using VideoEditorApp.Data;
+using VideoEditorApp.Helper;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 
@@ -11,19 +13,80 @@ namespace VideoEditorApp
 {
     public partial class MainPage : ContentPage
     {
+        private ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = [];
+        private bool deleteImportsMode = false;
+        private bool ignoreSelectionChangedImportedMedia = false;
+        private readonly IKeyboardMouseEvents localHook = Hook.AppEvents();
 
-        public ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = new();
 
         public MainPage()
         {
             InitializeComponent();
 
             ImportedMediaCollection_CV.ItemsSource = ImportedMedia;
-
+            
             UpdateImportedMediaView();
+
+            SubscribeMouseKeyHook();
         }
 
-        public void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
+        #region MouseKeyHook
+        public void SubscribeMouseKeyHook()
+        {
+            localHook.MouseDownExt += GlobalHookMouseDownExt;
+            localHook.KeyPress += GlobalHookKeyPress;
+        }
+
+        public void UnsubscribeMouseKeyHook()
+        {
+            localHook.MouseDownExt -= GlobalHookMouseDownExt;
+            localHook.KeyPress -= GlobalHookKeyPress;
+
+            //It is recommened to dispose it
+            localHook.Dispose();
+        }
+
+        private void GlobalHookKeyPress(object? sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            switch (e.KeyChar)
+            {
+                case (char)32:
+                    PlayPause_BTN_Pressed(null, new());
+                    break;
+
+                case 'h':
+                    ToStart_BTN_Pressed(null, new());
+                    break;
+
+                case 'j':
+                    Back10_BTN_Pressed(null, new());
+                    break;
+
+                case 'k':
+                    Forward10_BTN_Pressed(null, new());
+                    break;
+
+                case 'l':
+                    ToEnd_BTN_Pressed(null, new());
+                    break;
+
+                case 'r':
+                    SpeedChange_BTN_Pressed(null, new());
+                    break;
+            }
+        }
+
+        private void GlobalHookMouseDownExt(object? sender, MouseEventExtArgs e)
+        {
+            Console.WriteLine("MouseDown: \t{0}; \t System Timestamp: \t{1}", e.Button, e.Timestamp);
+
+            // uncommenting the following line will suppress the middle mouse button click
+            // if (e.Buttons == MouseButtons.Middle) { e.Handled = true; }
+        }
+        #endregion
+
+        #region ImportedMediaHandler
+        private void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
         {
             if (FileHelperMethods.videoExtensions.Contains(Path.GetExtension(fullClipFilePath)))
             {
@@ -47,7 +110,7 @@ namespace VideoEditorApp
             }
         }
 
-        public void UpdateImportedMediaView()
+        private void UpdateImportedMediaView()
         {
             foreach (string fileFolderPath in Directory.EnumerateDirectories(FileHelperMethods.GetProxyDirectory()))
             {
@@ -58,6 +121,19 @@ namespace VideoEditorApp
             }
         }
 
+        private void ImportedMediaCollection_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (ignoreSelectionChangedImportedMedia) { return; }
+            ImportedMediaItemDisplay item = (ImportedMediaItemDisplay)ImportedMediaCollection_CV.SelectedItem;
+            try
+            {
+                MediaPreview_ME.Source = Path.Combine(item.FolderPath, $"clip.mp4");
+            }
+            catch (Exception) { return; }
+        }
+        #endregion
+
+        #region TopRowButtons
         private async void Import_BTN_Clicked(object? sender, EventArgs e)
         {
             FileResult? file = await FileHelperMethods.PickSingleFileAsync();
@@ -109,16 +185,42 @@ namespace VideoEditorApp
             }
         }
 
-        private void ImportedMediaCollection_CV_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        private void DeleteMode_BTN_Clicked(object? sender, EventArgs e)
         {
-            ImportedMediaItemDisplay item = (ImportedMediaItemDisplay)ImportedMediaCollection_CV.SelectedItem;
-            try
-            {
-                MediaPreview_ME.Source = Path.Combine(item.FolderPath, $"clip.mp4");
-            }
-            catch (Exception) { return; }
-        }
+            deleteImportsMode = !deleteImportsMode;
 
+            if (deleteImportsMode)
+            {
+                ignoreSelectionChangedImportedMedia = true;
+                ImportedMediaCollection_CV.SelectedItem = null;
+                ImportedMediaCollection_CV.SelectedItems = null;
+                ImportedMediaCollection_CV.SelectionMode = SelectionMode.Multiple;
+            }
+            else
+            {
+                List<ImportedMediaItemDisplay> tempList = [.. ImportedMediaCollection_CV.SelectedItems.Cast<ImportedMediaItemDisplay>()];
+                foreach (ImportedMediaItemDisplay item in tempList)
+                {
+                    try
+                    {
+                        Directory.Delete(item.FolderPath, true);
+                        ImportedMedia.Remove(item);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Imported media deletion failed: {ex.Message}");
+                    }
+                }
+
+                ImportedMediaCollection_CV.SelectedItem = null;
+                ImportedMediaCollection_CV.SelectedItems = null;
+                ignoreSelectionChangedImportedMedia = false;
+                ImportedMediaCollection_CV.SelectionMode = SelectionMode.Single;
+            }
+        }
+        #endregion
+
+        #region MediaPreviewButtonsAndSupport
         private void ToStart_BTN_Pressed(object? sender, EventArgs e)
         {
             MediaPreview_ME.Stop();
@@ -182,5 +284,6 @@ namespace VideoEditorApp
                 };
             });
         }
+        #endregion
     }
 }

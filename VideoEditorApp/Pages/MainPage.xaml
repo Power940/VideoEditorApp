@@ -70,6 +70,7 @@
         <HorizontalStackLayout HorizontalOptions="Start">
             <Button ImageSource="import_one.png" Clicked="Import_BTN_Clicked"/>
             <Button ImageSource="import_multi.png" Clicked="ImportMulti_BTN_Clicked"/>
+            <Button ImageSource="delete.png" Clicked="DeleteMode_BTN_Clicked"/>
         </HorizontalStackLayout>
         
     </Grid>
