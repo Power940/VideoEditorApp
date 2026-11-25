@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 using FFMpegCore;
+using Gma.System.MouseKeyHook;
 using System.Collections.ObjectModel;
 using System.IO.Compression;
+using System.Windows.Forms;
 using VideoEditorApp.Data;
 using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
@@ -19,8 +21,67 @@ namespace VideoEditorApp
             InitializeComponent();
 
             ImportedMediaCollection_CV.ItemsSource = ImportedMedia;
-
+            
             UpdateImportedMediaView();
+
+            Subscribe();
+        }
+
+        private IKeyboardMouseEvents m_globalHook = Hook.GlobalEvents();
+
+        public void Subscribe()
+        {
+            m_globalHook.MouseDownExt += GlobalHookMouseDownExt;
+            m_globalHook.KeyPress += GlobalHookKeyPress;
+        }
+
+        private void GlobalHookKeyPress(object sender, KeyPressEventArgs e)
+        {
+            
+            switch (e.KeyChar)
+            {
+                
+                case (char)32:
+                    PlayPause_BTN_Pressed(null, new());
+                    break;
+
+                case 'h':
+                    ToStart_BTN_Pressed(null, new());
+                    break;
+
+                case 'j':
+                    Back10_BTN_Pressed(null, new());
+                    break;
+
+                case 'k':
+                    Forward10_BTN_Pressed(null, new());
+                    break;
+
+                case 'l':
+                    ToEnd_BTN_Pressed(null, new());
+                    break;
+
+                case 'r':
+                    SpeedChange_BTN_Pressed(null, new());
+                    break;
+            }
+        }
+
+        private void GlobalHookMouseDownExt(object sender, MouseEventExtArgs e)
+        {
+            Console.WriteLine("MouseDown: \t{0}; \t System Timestamp: \t{1}", e.Button, e.Timestamp);
+
+            // uncommenting the following line will suppress the middle mouse button click
+            // if (e.Buttons == MouseButtons.Middle) { e.Handled = true; }
+        }
+
+        public void Unsubscribe()
+        {
+            m_globalHook.MouseDownExt -= GlobalHookMouseDownExt;
+            m_globalHook.KeyPress -= GlobalHookKeyPress;
+
+            //It is recommened to dispose it
+            m_globalHook.Dispose();
         }
 
         public void AddImportedMediaItemToView(string fullClipFilePath, string folderPath)
