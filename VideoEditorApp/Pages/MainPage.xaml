@@ -59,11 +59,32 @@
                 Stroke="Black">
         
         </Border>
-        
+
         <Border Grid.Row="2" Grid.ColumnSpan="3"
                 Stroke="Black">
             <AbsoluteLayout x:Name="Timeline_AL">
-                
+                <AbsoluteLayout x:Name="TimeScale_AL" AbsoluteLayout.LayoutBounds="0.5, 0, 0.95, 0.12"
+                                AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                                BackgroundColor="#66666666"
+                                SizeChanged="UpdateTimeScale"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.15, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.30, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.45, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.60, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.75, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
+                <BoxView AbsoluteLayout.LayoutBounds="0.5, 0.90, 0.95, 0.12"
+                         AbsoluteLayout.LayoutFlags="PositionProportional, WidthProportional, HeightProportional"
+                         BackgroundColor="#44666666"/>
             </AbsoluteLayout>
         </Border>
 

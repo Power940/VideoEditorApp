@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 using FFMpegCore;
+using Microsoft.Maui.Layouts;
 using System.Collections.ObjectModel;
 using System.IO.Compression;
 using VideoEditorApp.Data;
@@ -13,6 +14,8 @@ namespace VideoEditorApp
     {
 
         public ObservableCollection<ImportedMediaItemDisplay> ImportedMedia { get; set; } = new();
+
+        public float TimelineScale { get; set; } = 5.0f;
 
         public MainPage()
         {
@@ -55,6 +58,26 @@ namespace VideoEditorApp
                 if (String.IsNullOrWhiteSpace(clipFile)) { continue; }
 
                 AddImportedMediaItemToView(clipFile, fileFolderPath);
+            }
+        }
+
+        public void UpdateTimeScale(object? sender, EventArgs e)
+        {
+            float totalElementWidth = (float)(TimeScale_AL.Width * DeviceDisplay.Current.MainDisplayInfo.Density);
+            float totalPixelsCleared = 0;
+            float ticksPlaced = 0;
+            TimeScale_AL.ClearLogicalChildren();
+            while (totalPixelsCleared < totalElementWidth)
+            {
+                totalPixelsCleared += TimelineScale;
+                BoxView tick = new BoxView()
+                {
+                    BackgroundColor = Color.FromArgb("#FF666666")
+                };
+                AbsoluteLayout.SetLayoutBounds(tick, new Rect(TimelineScale * ticksPlaced++, 1, 2, 0.3));
+                AbsoluteLayout.SetLayoutFlags(tick, AbsoluteLayoutFlags.YProportional);
+                AbsoluteLayout.SetLayoutFlags(tick, AbsoluteLayoutFlags.HeightProportional);
+                TimeScale_AL.Add(tick);
             }
         }
 
